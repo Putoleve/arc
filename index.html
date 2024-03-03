@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <script src="bootstrap.bundle.min.js"></script>
+    <script src="logic.script.js"></script>
+
+    <script lang="javascript" src="jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <img src="header fci new.png" class="img-fluid" alt="nust-fci-header">
+    </div>
+
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <h2>CUS/ICT Attendance Register Creator</h2>
+    </div>
+    <form id="form" class="d-grid gap-2 col-6 mx-auto">
+        <div class="form-floating mb-3">
+            <input type="text" required id="nameOfGroup" class="form-control" placeholder="CUS BLUE" />
+            <label for="nameOfGroup">Name of group</label>
+        </div>
+
+
+        <div class=" mb-3">
+            <label class="startingDate">Allowable starting day on the month</label>
+            <input type="date" required id="startingDate" class="form-control" />
+        </div>
+
+        <div class=" mb-3">
+            <label class="DaysToExclude"><b>Insert public holidaysdays to exclude (separated by a semicolon ;
+                    )</b></label>
+            <input type="text" required id="DaysToExclude" class="form-control" />
+        </div>
+
+        <div class=" mb-3">
+            <label for="numberOfClassesPerWeek" class="form-label">Allowable number of classes per week</label>
+            <input type="number" min="1" max="4" value="0" required onchange="generateTimeSlotInputs(this.value)"
+                id="numberOfClassesPerWeek" inputmode="numeric" class="form-control" />
+        </div>
+
+        <label for="cars">Choose Timeslots:</label>
+        <div id="timeslots">
+
+
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <input type="button" value="Generate Timeslots" onclick="handleSubmit()"
+                        class="btn btn-primary w-100" />
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <input type="reset" value="Reset" onclick="handleReset()"
+                        class="btn btn-warning w-100" />
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+</body>
+
+</html>
