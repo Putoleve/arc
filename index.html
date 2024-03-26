@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>Attendance Register Dates Generator</title>
@@ -27,22 +27,42 @@
 
         <div class=" mb-3">
             <label class="startingDate">Allowable starting day on the month</label>
-            <input type="date" required id="startingDate" class="form-control" />
+            <input type="date" required id="startingDate" class="form-control"
+                onchange="getPublicHolidaysFromAPI('NA',this.value)" />
         </div>
 
         <div class=" mb-3">
-            <label class="DaysToExclude"><b>Insert public holidaysdays to exclude (separated by a semicolon ;
+            <label class="DaysToExclude"><b>Insert public holidays or days to exclude (separated by a semicolon ;
                     )</b></label>
             <input type="text" required id="DaysToExclude" class="form-control" />
         </div>
 
-        <div class=" mb-3">
+       <!--  <div class=" mb-3">
             <label for="numberOfClassesPerWeek" class="form-label">Allowable number of classes per week</label>
             <input type="number" min="1" max="4" value="0" required onchange="generateTimeSlotInputs(this.value)"
                 id="numberOfClassesPerWeek" inputmode="numeric" class="form-control" />
+        </div> -->
+
+        <div class=" mb-3">
+            <label for="numberOfClassesPerWeek" class="form-label">Enter allowable number of classes per week</label>
+            <input type="number" min="1" max="4" value="0" onchange="createTimeSlotInputsV2(this.value)"
+                id="numberOfClassesPerWeek" inputmode="numeric" class="form-control" />
         </div>
 
-        <label for="cars">Choose Timeslots:</label>
+        <div class="row">
+            <div class="col">
+                <label for="timeslots">Day of the week:</label>
+            </div>
+
+            <div class="col">
+                <label for="timeslots">Start time:</label>
+            </div>
+
+            <div class="col">
+                <label for="timeslots">End time:</label>
+            </div>
+        </div>
+
         <div id="timeslots">
 
 
@@ -57,8 +77,7 @@
 
             <div class="col">
                 <div class="d-grid gap-2 col-6 mx-auto">
-                    <input type="reset" value="Reset" onclick="handleReset()"
-                        class="btn btn-warning w-100" />
+                    <input type="reset" value="Reset" onclick="handleReset()" class="btn btn-warning w-100" />
                 </div>
             </div>
         </div>

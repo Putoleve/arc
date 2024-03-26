@@ -2,6 +2,33 @@
 let form = document.getElementById('form')
 let currentAllowableClasses_perWeek = 0;
 
+//function to fetch from public holidays API
+async function getPublicHolidaysFromAPI(countryCode, dateFromUser) {
+    //handleReset()
+    //API LINK source : https://date.nager.at/Api
+    //extract the date
+    const yearFromDate = new Date(dateFromUser).getFullYear()
+
+    //sending the request to the API, the API expects a country code as an input
+    const request = await fetch("https://date.nager.at/api/v3/PublicHolidays/" + yearFromDate + "/" + countryCode)
+    //getting the reponse
+    const PublicHolidays = await request.json();
+    //days to exclude input
+    daysToexclude = document.getElementById("DaysToExclude")
+    //ressetting input
+    daysToexclude.value = ""
+
+    for (i = 0; i < PublicHolidays.length; i += 1) {
+        //check if the date provided is part of the current month
+        if (new Date(PublicHolidays[i].date).getMonth() == new Date(dateFromUser).getMonth()) {
+            //console.log(PublicHolidays[i].date)
+            //append to input
+            daysToexclude.value += new Date(PublicHolidays[i].date).getDate() + ";"
+            console.log(new Date(PublicHolidays[i].date).getDate() + ";")
+        }
+    }
+
+}
 const masterTimeslots = [{}];
 
 let monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June",
@@ -14,12 +41,7 @@ const mastertimeslotProps =
     time: null
 }
 
-function writeToSpreedsheet(excelWorkbookname, excelWorkbookSheetName, workbook_data) {
-    const workbook = XLSX.readFile(excelWorkbookname);
-    const worksheet = workbook.Sheets[excelWorkbookSheetName]
 
-    const timesloteArray = XLSX.utils.sheet_add_json(worksheet);
-}
 
 function handleReset() {
     location.reload()
@@ -29,6 +51,8 @@ function handleSubmit() {
     let nameOfGroup = document.getElementById("nameOfGroup").value;
     let date = document.getElementById("startingDate").value;
     let classesPerWeek = document.getElementById("numberOfClassesPerWeek").value;
+    //public holidays
+    //getPublicHolidaysFromAPI("NA", date)
     let daysToExlude = document.getElementById("DaysToExclude").value;
 
     let selectedDaysOfTheWeek = [];
@@ -41,19 +65,23 @@ function handleSubmit() {
     let tempArrayCounter = 0;
 
 
-    for (i = 1; i <= classesPerWeek; i += 1) {
+    for (i = 0; i < classesPerWeek; i += 1) {
         selectedDaysOfTheWeek[tempArrayCounter] = document.getElementById("timeslotWeekDay" + i).value
         selectedStartTime[tempArrayCounter] = document.getElementById("timeslotStartTime" + i).value
         selectedEndTime[tempArrayCounter] = document.getElementById("timeslotEndTime" + i).value
         tempArrayCounter += 1
     }
 
+    //extract the date
+    const monthFromDate = new Date(date).getMonth();
+    const yearFromDate = new Date(date).getFullYear()
+
     //console.log("Index value of postion is "+ selectedStartTime[0])
 
-    let days = getDaysInTheMonthV2(new Date(date).getMonth(), new Date(date).getFullYear(), new Date(date).getUTCDate(), publicHolidaysOrRecess)
+    let days = getDaysInTheMonthV2(monthFromDate, yearFromDate, new Date(date).getUTCDate(), publicHolidaysOrRecess)
 
     let data_to_display = "BELOW ARE TIMESLOTS FOR " + nameOfGroup.toLocaleUpperCase() + " GROUP \n"
-    console.log("BELOW ARE TIMESLOTS FOR " + nameOfGroup.toLocaleUpperCase() + " GROUP \n")
+    //console.log("BELOW ARE TIMESLOTS FOR " + nameOfGroup.toLocaleUpperCase() + " GROUP \n")
     for (let i = 0; i < days.length; i++) {
         let dayOfTheWeek = new Date(days[i]).getDay().toString();
         if (selectedDaysOfTheWeek.includes(dayOfTheWeek)) {
@@ -108,133 +136,91 @@ function getDaysInTheMonthV2(month, year, StartingInitialDay, excludedDays) {
     }
     return days;
 }
-function generateTimeSlotInputs(numberOfClassesPerWeek) {
-    //console.log("function called")
-    //console.log(numberOfClassesPerWeek)
-    /* for (let i = 0; i < numberOfClassesPerWeek; i++) {
-        displayInputV2()
-    } */
-    handleAddOrRemoveInputFromDisplay(numberOfClassesPerWeek)
-}
 
 
-function displayInput() {
-    let timeInputElement = document.createElement('input');
-    timeInputElement.type = 'time'
+function createTimeSlotInputsV2(numberOfAllowableClassesPerWeek) {
+    const timeslotContainer = document.getElementById('timeslots')
+    const daysOfTheWeek = ['Choose a day', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
-    let dayOfTheWeekInput = document.createElement('select');
-    dayOfTheWeekInput.selectedOptions = ['']
+    //number of inputs
+    const numberOfInputs = parseInt(numberOfAllowableClassesPerWeek)
+    //clear all inputs
+    timeslotContainer.innerHTML = ''
 
-    let container = document.getElementById("timeslots");
-    container.appendChild(timeInputElement)
-    container.appendChild(dayOfTheWeekInput)
+    //div class="row" id="timeslotWeekDay_Container' + newAllowableClasses_perWeek
 
-}
 
-function handleAddOrRemoveInputFromDisplay(newAllowableClasses_perWeek) {
-    //check if increment or decrease.
-    console.log(`current: ${currentAllowableClasses_perWeek} New: ${newAllowableClasses_perWeek}`)
-    if (newAllowableClasses_perWeek > currentAllowableClasses_perWeek) {
-        currentAllowableClasses_perWeek += 1;
-        let html = '<div class="row" id="timeslotWeekDay_Container' + newAllowableClasses_perWeek + '">\
-                        <div class="col">\
-                        <label for="timeslotWeekDay" class="form-label"> Day of the Week</label>\
-                            <select required class="form-select" id="timeslotWeekDay' + newAllowableClasses_perWeek + '" >\
-                                <option default selected>Choose day</option>\
-                                <option value="1">Monday</option>\
-                                <option value="2">Tuesday</option>\
-                                <option value="3">Wednesday</option>\
-                                <option value="4">Thursday</option>\
-                                <option value="5">Friday</option>\
-                                <option value="6">Saturday</option>\
-                                <option value="0">Sunday</option>\
-                            </select>\
-                        </div>\
-                        \
-                        <div class="col">\
-                            <label for="timeslotStartTime" class="form-label"> Start Time</label>\
-                            <input class="form-control" type="time" required id="timeslotStartTime'+ newAllowableClasses_perWeek + '"/>\
-                        </div>\
-                        <div class="col">\
-                            <label for="timeslotEndTime" class="form-label">End Time</label>\
-                            <input class="form-control"  type="time" required id="timeslotEndTime'+ newAllowableClasses_perWeek + '"/>\
-                        <div>\
-                 </div>';
+    // Add options to select element
+    for (let i = 0; i < numberOfInputs; i++) {
+        const row = document.createElement('div')
+        row.className = "row"
+        row.id = "timeslotWeekDay_Container" + i
+        row.style={'padding-bottom:':'200px'}
 
-        let container = document.getElementById("timeslots");
-        container.innerHTML += (html)
+        const column1 = document.createElement('div')
+        column1.className = "col"
+        const column2 = document.createElement('div')
+        column2.className = "col"
+        const column3 = document.createElement('div')
+        column3.className = "col"
+
+
+
+
+        const selectElement = document.createElement('select');
+        selectElement.className = 'form-select'
+        selectElement.id = 'timeslotWeekDay' + i
+        selectElement.required = true
+
+        const startTime = document.createElement('input')
+        startTime.type = 'time'
+        startTime.className = 'form-control'
+        startTime.id = 'timeslotStartTime' + i
+
+        const endTime = document.createElement('input')
+        endTime.type = 'time'
+        endTime.className = 'form-control'
+        endTime.id = 'timeslotEndTime' + i
+
+
+        for (let i = 0; i < daysOfTheWeek.length; i += 1) {
+            const option = document.createElement('option');
+            //option.id='timeslotWeekDay'+i
+            option.text = daysOfTheWeek[i]
+            option.value = i
+
+
+            selectElement.appendChild(option)
+            column1.appendChild(selectElement)
+        }
+
+        /* option.text = `Option ${i + 1}`;
+        option.value = `value${i + 1}`;
+        selectElement.appendChild(option); */
+
+        column2.appendChild(startTime)
+        column3.appendChild(endTime)
+        row.appendChild(column1)
+        row.appendChild(column2)
+        row.appendChild(column3)
+
+        const lineBreak=document.createElement('br')
+
+        timeslotContainer.appendChild(row)
+        timeslotContainer.appendChild(lineBreak)
+
+        
+        
     }
-    else {
-        //remove on decreaase
-        currentAllowableClasses_perWeek -= 1;
-        let lastTimeslotInput = document.getElementById(`timeslotWeekDay_Container${currentAllowableClasses_perWeek + 1}`)
-        lastTimeslotInput.remove();
-    }
 
-    console.log(`**current: ${currentAllowableClasses_perWeek} New: ${newAllowableClasses_perWeek}`)
 }
 
 
 
 
-//find the datatable div.
-const datatableDiv = document.querySelector("div.datatable");
-
-//table headers
-let tableHeaders = ["Date", "Time"];
-
-const generateTimeslotsTable = () => {
-    //empty the modal
-    /*  while (datatableDiv.firstChild!=null) {
-         datatableDiv.removeChild(datatableDiv.firstChild)
-     }
-   */
-
-    //create the table
-    let timeslotdataTable = document.createElement('table');
-    timeslotdataTable.className = 'timeslotdataTable';
 
 
-    //create table headers
-    let timeslotdataTableHead = document.createElement('thead');
-    timeslotdataTableHead.className = 'timeslotdataTableHead';
 
-    //create table row
-    let timeslotdataTableHeaderRow = document.createElement('tr');
-    timeslotdataTableHeaderRow.className = 'timeslotdataTableRow';
-
-    //appending the headers
-    tableHeaders.forEach(header => {
-        let timeslotHeader = document.createElement('th');
-        timeslotHeader.innerText = header
-        timeslotdataTableHeaderRow.append(timeslotHeader);
-    })
-
-    timeslotdataTableHead.append(tableHeaders)
-    timeslotdataTable.append(timeslotdataTableHead)
-
-    //create table body group
-    let timeslotTableBody = document.createElement('tbody')
-    timeslotTableBody.className = 'timeslotTableBody'
-    timeslotdataTable.append(timeslotTableBody);
-}
-
-const appendTimeslots = (singleTimeslot) => {
-    //find the table
-    let timeslotdataTable = document.querySelector('timeslotdataTable')
-
-    let timeslotTableBodyRow = document.createElement('tr')
-    timeslotTableBodyRow.className = "timeslotTableRowBody"
-
-    let dateData = document.createElement('td');
-    dateData.innerText = singleTimeslot.date;
-
-    let timeData = document.createElement('td');
-    timeData.innerText = singleTimeslot.time;
-
-    timeslotTableBodyRow.append(dateData, timeData);
-    timeslotdataTable.append(timeslotTableBodyRow)
-}
 
 
 
