@@ -59,6 +59,7 @@ function handleSubmit() {
     let selectedStartTime = [];
     let selectedEndTime = [];
     let publicHolidaysOrRecess = daysToExlude.split(";");
+    let data = [];
 
 
 
@@ -76,6 +77,8 @@ function handleSubmit() {
     const monthFromDate = new Date(date).getMonth();
     const yearFromDate = new Date(date).getFullYear()
 
+
+
     //console.log("Index value of postion is "+ selectedStartTime[0])
 
     let days = getDaysInTheMonthV2(monthFromDate, yearFromDate, new Date(date).getUTCDate(), publicHolidaysOrRecess)
@@ -88,9 +91,12 @@ function handleSubmit() {
             let day = new Date(days[i]).getDate()
             let month = new Date(days[i]).getMonth()
             let year = new Date(days[i]).getFullYear()
-            console.log(`${day}-${monthNames[month]}-${year} @ ` + selectedStartTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)]
-                + `-` + selectedEndTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)])
-
+            //console.log(`${day}-${monthNames[month]}-${year} @ ` + selectedStartTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)]
+            //  + `-` + selectedEndTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)])
+            let dateArray = new Array(
+                formatToDate(day, monthNames[month], year),
+                formatStartAndEndTime(selectedStartTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)], selectedEndTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)]))
+            data.push(dateArray)
             data_to_display += `${day}-${monthNames[month]}-${year} @ ` + selectedStartTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)]
                 + `-` + selectedEndTime[selectedDaysOfTheWeek.indexOf(dayOfTheWeek)] + `\n`;
 
@@ -100,7 +106,32 @@ function handleSubmit() {
 
     //alert(data_to_display)
     //prompt(`Copy Timeslots for ${nameOfGroup.toLocaleUpperCase()}`,data_to_display)
-    saveTextAsFile(data_to_display, nameOfGroup, "text/plain")
+    //saveTextAsFile(data_to_display, nameOfGroup, "text/plain")
+    saveToExcelFile(data, nameOfGroup)
+}
+
+function formatToDate(day, month, year) {
+    return day + " " + month + " " + year;
+}
+
+function formatStartAndEndTime(startTime, endTime) {
+    return startTime + "-" + endTime;
+}
+function saveToExcelFile(data, fileNameToSaveAs) {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    data.forEach(row => {
+        const rowContent = row.join(',');
+        csvContent += rowContent + '\n';
+    });
+
+    // Create a link element and trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(fileNameToSaveAs, 'data.csv');
+    document.body.appendChild(link);
+    link.download = fileNameToSaveAs;
+    link.click();
 }
 
 function saveTextAsFile(textContent, fileNameToSaveAs, fileType) {
@@ -155,7 +186,7 @@ function createTimeSlotInputsV2(numberOfAllowableClassesPerWeek) {
         const row = document.createElement('div')
         row.className = "row"
         row.id = "timeslotWeekDay_Container" + i
-        row.style={'padding-bottom:':'200px'}
+        row.style = { 'padding-bottom:': '200px' }
 
         const column1 = document.createElement('div')
         column1.className = "col"
@@ -204,13 +235,13 @@ function createTimeSlotInputsV2(numberOfAllowableClassesPerWeek) {
         row.appendChild(column2)
         row.appendChild(column3)
 
-        const lineBreak=document.createElement('br')
+        const lineBreak = document.createElement('br')
 
         timeslotContainer.appendChild(row)
         timeslotContainer.appendChild(lineBreak)
 
-        
-        
+
+
     }
 
 }
