@@ -128,7 +128,7 @@ function saveToExcelFile(data, fileNameToSaveAs) {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute(fileNameToSaveAs, 'data.csv');
+    link.setAttribute('download', 'data.csv');
     document.body.appendChild(link);
     link.download = fileNameToSaveAs;
     link.click();
