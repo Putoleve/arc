@@ -182,7 +182,7 @@ function createTimeSlotInputsV2(numberOfAllowableClassesPerWeek) {
 
 
     // Add options to select element
-    for (let i = 0; i < numberOfInputs; i++) {
+    for (let i = 0; i < numberOfInputs&&numberOfAllowableClassesPerWeek<=4; i++) {
         const row = document.createElement('div')
         row.className = "row"
         row.id = "timeslotWeekDay_Container" + i
