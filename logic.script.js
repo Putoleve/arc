@@ -18,7 +18,16 @@ async function getPublicHolidaysFromAPI(countryCode, dateFromUser) {
     //ressetting input
     daysToexclude.value = ""
 
-    for (i = 0; i < PublicHolidays.length; i += 1) {
+    const currentMonth = new Date(dateFromUser).getMonth();
+
+const days = PublicHolidays
+    .filter(holiday => new Date(holiday.date).getMonth() === currentMonth)
+    .map(holiday => new Date(holiday.date).getDate());
+
+daysToexclude.value = days.join(";") + ";";
+console.log(daysToexclude.value);
+
+    /*for (i = 0; i < PublicHolidays.length; i += 1) {
         //check if the date provided is part of the current month
         if (new Date(PublicHolidays[i].date).getMonth() == new Date(dateFromUser).getMonth()) {
             //console.log(PublicHolidays[i].date)
@@ -26,7 +35,7 @@ async function getPublicHolidaysFromAPI(countryCode, dateFromUser) {
             daysToexclude.value += new Date(PublicHolidays[i].date).getDate() + ";"
             console.log(new Date(PublicHolidays[i].date).getDate() + ";")
         }
-    }
+    }*/
 
 }
 const masterTimeslots = [{}];
